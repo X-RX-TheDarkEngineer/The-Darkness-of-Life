@@ -33,7 +33,7 @@
       cursor: pointer;
     }
     /* Full-screen moving title screen, content overlaid on top */
-    video {
+    #titleVideo {
       position: fixed;
       top: 0;
       left: 0;
@@ -48,20 +48,64 @@
       text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9);
     }
     button { text-shadow: none; }
+    /* Fade the title out when START is pressed */
+    body > * { transition: opacity 1s ease; }
+    body.fading > *:not(#loading) { opacity: 0; }
+    /* Loading screen: X-RX, his run, and Loading... */
+    #loading {
+      position: fixed;
+      inset: 0;
+      background: #05070d;
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+    }
+    #loading.show { opacity: 1; pointer-events: auto; }
+    #loading img {
+      height: 45vh;
+      max-width: 90vw;
+      object-fit: contain;
+    }
+    #loading video {
+      width: 320px;
+      max-width: 80vw;
+      margin-top: 8px;
+    }
+    #loading .loading-text {
+      color: #00bfff;
+      font-size: 22px;
+      letter-spacing: 4px;
+      margin-top: 16px;
+    }
   </style>
 </head>
 <body>
   <h1>THE DARKNESS OF LIFE</h1>
-  <video src="assets/title-screen.mp4" poster="assets/title-screen-art.png" autoplay muted loop playsinline></video>
+  <video id="titleVideo" src="assets/title-screen.mp4" poster="assets/title-screen-art.png" autoplay muted loop playsinline></video>
   <p><em>"We walk the dark, rise. We walk with truth and honor. We tend and earn our place."</em></p>
   <p>A Chain of Memories-inspired card battler, made our own.</p>
   <button id="startBtn">START</button>
   <p id="message"></p>
 
+  <!-- Loading screen shown after START: X-RX, his run, Loading... -->
+  <div id="loading">
+    <img src="assets/x-rx-loading.png" alt="Xado_RemnantX">
+    <video src="assets/x-rx-running.mp4" autoplay muted loop playsinline></video>
+    <p class="loading-text">Loading...</p>
+  </div>
+
   <script>
-    // When Start is pressed, go to the first level
+    // When Start is pressed, fade out the title, show the
+    // loading screen for ~5 seconds, then go to character creation
     document.getElementById('startBtn').addEventListener('click', () => {
-      window.location.href = 'character.html';
+      document.body.classList.add('fading');
+      const loading = document.getElementById('loading');
+      setTimeout(() => loading.classList.add('show'), 1000);
+      setTimeout(() => { window.location.href = 'character.html'; }, 6000);
     });
   </script>
 </body>
