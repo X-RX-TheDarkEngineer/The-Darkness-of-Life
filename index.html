@@ -78,21 +78,7 @@
     /* The video has its own title and PRESS START baked in,
        so the page's own title text stays hidden */
     h1, .tagline { display: none; }
-    /* A real START button, below the video's own PRESS START */
-    #startBtn {
-      position: absolute;
-      left: 50%;
-      bottom: 7%;
-      transform: translateX(-50%);
-      padding: 14px 40px;
-      font-size: 20px;
-      background: #00bfff;
-      color: #05070d;
-      border: none;
-      cursor: pointer;
-      margin-top: 0;
-    }
-    /* Fade the title out when START is pressed */
+    /* Fade the title out when the screen is tapped */
     body > * { transition: opacity 1s ease; }
     body.fading > *:not(#loading) { opacity: 0; }
     /* Loading screen: X-RX runs along the city streets, CoM style */
@@ -144,10 +130,9 @@
   <video id="titleVideo" src="assets/title-screen.mp4" poster="assets/title-screen-poster.jpg" autoplay muted playsinline></video>
   <video id="titleEndVideo" src="assets/title-screen-end.mp4" poster="assets/title-screen-end.png" muted playsinline preload="auto"></video>
   <div id="powerPulse"><div class="pulse-glow"></div></div>
-  <audio id="titleMusic" src="assets/title-music.mp3" loop preload="auto"></audio>
+  <audio id="titleMusic" src="assets/title-music.mp3" loop preload="auto" autoplay></audio>
   <p class="tagline"><em>"We walk the dark, rise. We walk with truth and honor. We tend and earn our place."</em></p>
   <p class="tagline">A Chain of Memories-inspired card battler, made our own.</p>
-  <button id="startBtn" aria-label="Start game">START</button>
   <p id="message"></p>
 
   <!-- Loading screen: X-RX runs along the city streets -->
@@ -157,10 +142,13 @@
   </div>
 
   <script>
-    // Title music: "Gason Van Yan's Coffin" — browsers only allow
-    // sound after a tap, so it starts on the first tap anywhere
+    // Title music: "Gason Van Yan's Coffin" — it tries to start the
+    // moment the page opens; browsers block sound until the first
+    // tap on a first visit, so it also starts on the first tap
+    // anywhere, and on later visits it can autoplay outright
     const titleMusic = document.getElementById('titleMusic');
     titleMusic.volume = 0.8;
+    titleMusic.play().catch(() => {});
     document.addEventListener('pointerdown', () => {
       titleMusic.play().catch(() => {});
     }, { once: true });
@@ -198,9 +186,9 @@
     });
     endVideo.addEventListener('ended', showTitle);
 
-    // When Start is pressed (or anywhere on the screen is tapped),
-    // fade out the title, show the loading screen for ~5 seconds,
-    // then go to character creation
+    // When anywhere on the screen is tapped, fade out the title,
+    // show the loading screen for ~5 seconds, then go to
+    // character creation
     let started = false;
     function startGame() {
       if (started) return;
@@ -210,7 +198,6 @@
       setTimeout(() => loading.classList.add('show'), 1000);
       setTimeout(() => { window.location.href = 'character.html'; }, 6000);
     }
-    document.getElementById('startBtn').addEventListener('click', startGame);
     document.addEventListener('click', startGame);
   </script>
 </body>
