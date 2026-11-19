@@ -33,7 +33,7 @@
       cursor: pointer;
     }
     /* Full-screen title video, whole frame visible, nothing clipped */
-    #titleVideo {
+    #titleVideo, #titleEndVideo {
       position: fixed;
       top: 0;
       left: 0;
@@ -42,6 +42,32 @@
       object-fit: contain;
       background: #05070d;
       z-index: 0;
+    }
+    /* The end scene starts hidden and crossfades in over the title */
+    #titleEndVideo {
+      opacity: 0;
+      transition: opacity 1.5s ease;
+    }
+    #titleEndVideo.show { opacity: 1; }
+    /* Electric power breathing over the resting end scene */
+    #powerPulse {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 1.5s ease;
+    }
+    #powerPulse.show { opacity: 1; }
+    #powerPulse .pulse-glow {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 60%, rgba(0, 191, 255, 0.20) 0%, rgba(0, 191, 255, 0.06) 45%, transparent 70%);
+      animation: power-breathe 3s ease-in-out infinite;
+    }
+    @keyframes power-breathe {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
     }
     h1, p, button {
       position: relative;
@@ -116,6 +142,8 @@
 <body>
   <h1>THE DARKNESS OF LIFE</h1>
   <video id="titleVideo" src="assets/title-screen.mp4" poster="assets/title-screen-poster.jpg" autoplay muted playsinline></video>
+  <video id="titleEndVideo" src="assets/title-screen-end.mp4" poster="assets/title-screen-end.png" muted playsinline preload="auto"></video>
+  <div id="powerPulse"><div class="pulse-glow"></div></div>
   <p class="tagline"><em>"We walk the dark, rise. We walk with truth and honor. We tend and earn our place."</em></p>
   <p class="tagline">A Chain of Memories-inspired card battler, made our own.</p>
   <button id="startBtn" aria-label="Start game">START</button>
@@ -128,15 +156,23 @@
   </div>
 
   <script>
-    // Play the title video once, then loop only its settled
-    // end portion — the diminished lurking above the town,
-    // X-RX standing with his coat blowing — until the user starts
+    // Play the title video once, then smoothly crossfade into the
+    // end scene — the diminished hovering over the city, X-RX
+    // holding his sword with his cello on his back, static with
+    // power. The end video plays once and holds its last frame;
+    // nothing loops.
     const titleVideo = document.getElementById('titleVideo');
-    const TAIL_START = 7.5; // seconds in; the camera has stopped panning
+    const endVideo = document.getElementById('titleEndVideo');
+    const powerPulse = document.getElementById('powerPulse');
+    let transitioned = false;
     titleVideo.addEventListener('timeupdate', () => {
-      if (titleVideo.duration &&
-          titleVideo.currentTime >= titleVideo.duration - 0.25) {
-        titleVideo.currentTime = TAIL_START;
+      if (transitioned || !titleVideo.duration) return;
+      if (titleVideo.currentTime >= titleVideo.duration - 1.5) {
+        transitioned = true;
+        endVideo.play();
+        endVideo.classList.add('show');
+        powerPulse.classList.add('show');
+        setTimeout(() => titleVideo.pause(), 1600);
       }
     });
 
