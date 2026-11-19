@@ -38,10 +38,9 @@
   <p id="message"></p>
 
   <script>
-    // When Start is pressed, show the next step's placeholder line
+    // When Start is pressed, go to the first level
     document.getElementById('startBtn').addEventListener('click', () => {
-      document.getElementById('message').textContent =
-        'Loading Level 1...';
+      window.location.href = 'level1.html';
     });
   </script>
 </body>
