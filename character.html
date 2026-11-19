@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Darkness of Life — Character Creation</title>
+<style>
+  body { margin: 0; background: #05070d; color: #e8ecf4;
+    font-family: sans-serif; text-align: center; }
+  h1 { margin-top: 40px; color: #00bfff; }
+  p { color: #9aa7bd; }
+  img.sprite { width: 180px; image-rendering: pixelated; margin-top: 10px; }
+  input {
+    margin-top: 10px; padding: 10px; font-size: 20px; text-align: center;
+    background: #0d1020; color: #e8ecf4; border: 1px solid #00bfff;
+  }
+  .card {
+    margin: 30px auto; padding: 20px; width: 260px;
+    background: #0d1020; border: 2px solid #00bfff;
+  }
+  .card h2 { margin: 0; color: #00bfff; }
+  .card .value {
+    display: inline-block; margin-top: 10px; padding: 4px 12px;
+    background: #00bfff; color: #05070d; border-radius: 12px;
+  }
+  button {
+    margin: 10px; padding: 12px 30px; font-size: 18px;
+    background: #00bfff; color: #05070d; border: none; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+  <h1>WHO WALKS THE DARK?</h1>
+  <img class="sprite" src="assets/xado-sprite.png" alt="Xado_RemnantX">
+  <p>Your name</p>
+  <input id="nameInput" value="Xado_RemnantX">
+  <div class="card">
+    <h2>CELLO</h2>
+    <p>Starting sound — low, warm, bowed. The first card in your deck.</p>
+    <span class="value">5</span>
+    <br><br>
+    <button id="hearBtn">Hear it</button>
+  </div>
+  <button id="beginBtn">Begin</button>
+  <p id="message"></p>
+  <script>
+    // A cello-like note: sawtooth through a low-pass filter,
+    // slow attack like a bow, C2 (65.41 Hz) and its octave.
+    function playCello() {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 800;
+      filter.connect(ctx.destination);
+      const gain = ctx.createGain();
+      gain.connect(filter);
+      const now = ctx.currentTime;
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.4, now + 0.3); // bow attack
+      gain.gain.setValueAtTime(0.4, now + 1.2);
+      gain.gain.linearRampToValueAtTime(0, now + 2.0);   // bow lift
+      for (const freq of [65.41, 130.81]) {
+        const osc = ctx.createOscillator();
+        osc.type = 'sawtooth';
+        osc.frequency.value = freq;
+        osc.connect(gain);
+        osc.start(now);
+        osc.stop(now + 2.0);
+      }
+    }
+    document.getElementById('hearBtn').addEventListener('click', playCello);
+    document.getElementById('beginBtn').addEventListener('click', () => {
+      const name = document.getElementById('nameInput').value;
+      document.getElementById('message').textContent =
+        name + ' walks the dark, cello in hand.';
+      setTimeout(() => { window.location.href = 'level1.html'; }, 1200);
+    });
+  </script>
+</body>
+</html>
