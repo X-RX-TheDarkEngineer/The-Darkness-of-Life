@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>The Darkness of Life</title>
+  <style>
+    /* Dark background, centred content, electric blue accent */
+    body {
+      margin: 0;
+      background: #05070d;
+      color: #e8ecf4;
+      font-family: sans-serif;
+      text-align: center;
+    }
+    h1 {
+      margin-top: 60px;
+      font-size: 48px;
+      color: #00bfff;
+    }
+    p { color: #9aa7bd; }
+    button {
+      margin-top: 30px;
+      padding: 14px 40px;
+      font-size: 20px;
+      background: #00bfff;
+      color: #05070d;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>THE DARKNESS OF LIFE</h1>
+  <img src="assets/main-character.jpg" alt="Xado_RemnantX, the main character" width="300">
+  <p><em>"We walk the dark, rise. We walk with truth and honor. We tend and earn our place."</em></p>
+  <p>A Chain of Memories-inspired card battler, made our own.</p>
+  <button id="startBtn">START</button>
+  <p id="message"></p>
+
+  <script>
+    // When Start is pressed, show the next step's placeholder line
+    document.getElementById('startBtn').addEventListener('click', () => {
+      document.getElementById('message').textContent =
+        'Loading Level 1...';
+    });
+  </script>
+</body>
+</html>

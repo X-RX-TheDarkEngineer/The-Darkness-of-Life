@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Darkness of Life — Level 1</title>
+<style>
+  body { margin: 0; background: #05070d; text-align: center; }
+  canvas {
+    image-rendering: pixelated;
+    width: 720px; height: 480px;
+    background: #0a0e1a;
+    margin-top: 20px;
+  }
+  p { color: #9aa7bd; font-family: sans-serif; }
+</style>
+</head>
+<body>
+<canvas id="game" width="480" height="320"></canvas>
+<p>Move with WASD or arrow keys. Xado_RemnantX walks the city.</p>
+<script>
+// Level: '#' is a building (solid), '.' is street (walkable)
+const MAP = [
+  "###############",
+  "#.............#",
+  "#..##.........#",
+  "#.............#",
+  "#......##.....#",
+  "#.............#",
+  "#....#........#",
+  "#.............#",
+  "#.........##..#",
+  "###############",
+];
+const TILE = 32;
+
+// Player: position, size, velocity
+const player = { x: 64, y: 64, w: 20, h: 20, vx: 0, vy: 0 };
+const SPEED = 0.4;      // acceleration each frame a key is held
+const FRICTION = 0.8;   // velocity kept each frame — lower = stops faster
+const MAX_SPEED = 2.2;
+
+const keys = {};
+addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+
+// Is the tile at this pixel solid?
+function solid(px, py) {
+  const col = Math.floor(px / TILE), row = Math.floor(py / TILE);
+  return MAP[row][col] === '#';
+}
+
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+
+function update() {
+  // Acceleration from keys
+  if (keys['a'] || keys['arrowleft']) player.vx -= SPEED;
+  if (keys['d'] || keys['arrowright']) player.vx += SPEED;
+  if (keys['w'] || keys['arrowup']) player.vy -= SPEED;
+  if (keys['s'] || keys['arrowdown']) player.vy += SPEED;
+  // Friction: velocity fades every frame, so he glides to a stop
+  player.vx *= FRICTION;
+  player.vy *= FRICTION;
+  // Clamp speed
+  player.vx = Math.max(-MAX_SPEED, Math.min(MAX_SPEED, player.vx));
+  player.vy = Math.max(-MAX_SPEED, Math.min(MAX_SPEED, player.vy));
+  // Move X, stop at walls; then move Y, stop at walls
+  const nx = player.x + player.vx;
+  if (!solid(nx, player.y) && !solid(nx + player.w, player.y) &&
+      !solid(nx, player.y + player.h) && !solid(nx + player.w, player.y + player.h)) {
+    player.x = nx;
+  }
+  const ny = player.y + player.vy;
+  if (!solid(player.x, ny) && !solid(player.x + player.w, ny) &&
+      !solid(player.x, ny + player.h) && !solid(player.x + player.w, ny + player.h)) {
+    player.y = ny;
+  }
+}
+
+function draw() {
+  // Draw the city
+  for (let r = 0; r < MAP.length; r++) {
+    for (let c = 0; c < MAP[r].length; c++) {
+      ctx.fillStyle = MAP[r][c] === '#' ? '#1a2233' : '#0a0e1a';
+      ctx.fillRect(c * TILE, r * TILE, TILE, TILE);
+    }
+  }
+  // Draw Xado_RemnantX as pixels: black coat, blue glow
+  const px = Math.round(player.x), py = Math.round(player.y);
+  ctx.fillStyle = '#00bfff';
+  ctx.fillRect(px + 4, py, 12, 4);       // glowing sword on his back
+  ctx.fillStyle = '#111111';
+  ctx.fillRect(px, py + 4, 20, 16);      // long black coat
+  ctx.fillStyle = '#c9a06a';
+  ctx.fillRect(px + 6, py + 4, 8, 6);    // face
+}
+
+function loop() { update(); draw(); requestAnimationFrame(loop); }
+loop();
+</script>
+</body>
+</html>
