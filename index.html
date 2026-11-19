@@ -123,6 +123,52 @@
       margin: 0;
       text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9);
     }
+    /* Enter prompt: blurs the entire screen until the user answers */
+    #enterPrompt {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(5, 7, 13, 0.55);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    #enterPrompt.hidden { display: none; }
+    #enterPrompt .prompt-card {
+      background: #0a0f1c;
+      border: 1px solid #00bfff;
+      box-shadow: 0 0 40px rgba(0, 191, 255, 0.35);
+      padding: 28px 32px;
+      max-width: 340px;
+      text-align: center;
+    }
+    #enterPrompt .prompt-card p {
+      color: #e8ecf4;
+      font-size: 20px;
+      margin: 0 0 22px;
+    }
+    #enterPrompt .prompt-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+    }
+    #enterPrompt .prompt-buttons button {
+      margin-top: 0;
+      padding: 12px 32px;
+      font-size: 18px;
+      cursor: pointer;
+      border: 1px solid #00bfff;
+    }
+    #enterPrompt .prompt-yes {
+      background: #00bfff;
+      color: #05070d;
+    }
+    #enterPrompt .prompt-no {
+      background: transparent;
+      color: #00bfff;
+    }
   </style>
 </head>
 <body>
@@ -130,7 +176,7 @@
   <video id="titleVideo" src="assets/title-screen.mp4" poster="assets/title-screen-poster.jpg" autoplay muted playsinline></video>
   <video id="titleEndVideo" src="assets/title-screen-end.mp4" poster="assets/title-screen-end.png" muted playsinline preload="auto"></video>
   <div id="powerPulse"><div class="pulse-glow"></div></div>
-  <audio id="titleMusic" src="assets/title-music.mp3" loop preload="auto" autoplay></audio>
+  <audio id="titleMusic" src="assets/title-music.mp3" loop preload="auto"></audio>
   <p class="tagline"><em>"We walk the dark, rise. We walk with truth and honor. We tend and earn our place."</em></p>
   <p class="tagline">A Chain of Memories-inspired card battler, made our own.</p>
   <p id="message"></p>
@@ -141,17 +187,24 @@
     <p class="loading-text">Loading...</p>
   </div>
 
+  <!-- Enter prompt: blurs the whole screen; answering it is the
+       click that lets the music play -->
+  <div id="enterPrompt">
+    <div class="prompt-card">
+      <p>Are you ready to enter the Dissonance?</p>
+      <div class="prompt-buttons">
+        <button id="enterYes" class="prompt-yes" type="button">YES</button>
+        <button id="enterNo" class="prompt-no" type="button">NO</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // Title music: "Gason Van Yan's Coffin" — it tries to start the
-    // moment the page opens; browsers block sound until the first
-    // tap on a first visit, so it also starts on the first tap
-    // anywhere, and on later visits it can autoplay outright
+    // Title music: "Gason Van Yan's Coffin" — it starts only once
+    // the user answers the enter prompt, because that click is
+    // the gesture browsers need before sound can play
     const titleMusic = document.getElementById('titleMusic');
     titleMusic.volume = 0.8;
-    titleMusic.play().catch(() => {});
-    document.addEventListener('pointerdown', () => {
-      titleMusic.play().catch(() => {});
-    }, { once: true });
 
     // Title loop: the intro video plays, crossfades into the end
     // scene — the diminished hovering over the city, X-RX holding
@@ -186,12 +239,41 @@
     });
     endVideo.addEventListener('ended', showTitle);
 
+    // Enter prompt: blurs the whole screen until the user answers.
+    // Either answer clears the prompt and restarts the title
+    // video from the beginning; YES also starts the music.
+    const enterPrompt = document.getElementById('enterPrompt');
+    let promptDismissed = false;
+    function dismissPrompt(withMusic) {
+      if (promptDismissed) return;
+      promptDismissed = true;
+      enterPrompt.classList.add('hidden');
+      // Restart the title loop from the beginning
+      showing = 'title';
+      endVideo.classList.remove('show');
+      powerPulse.classList.remove('show');
+      endVideo.pause();
+      titleVideo.currentTime = 0;
+      titleVideo.play();
+      if (withMusic) titleMusic.play().catch(() => {});
+    }
+    document.getElementById('enterYes').addEventListener('click', (e) => {
+      e.stopPropagation();
+      dismissPrompt(true);
+    });
+    document.getElementById('enterNo').addEventListener('click', (e) => {
+      e.stopPropagation();
+      dismissPrompt(false);
+    });
+    // Clicks on the prompt itself must not start the game
+    enterPrompt.addEventListener('click', (e) => e.stopPropagation());
+
     // When anywhere on the screen is tapped, fade out the title,
     // show the loading screen for ~5 seconds, then go to
     // character creation
     let started = false;
     function startGame() {
-      if (started) return;
+      if (started || !promptDismissed) return;
       started = true;
       document.body.classList.add('fading');
       const loading = document.getElementById('loading');
