@@ -13,9 +13,32 @@
     margin-top: 10px; padding: 10px; font-size: 20px; text-align: center;
     background: #0d1020; color: #e8ecf4; border: 1px solid #00bfff;
   }
+  .choices {
+    display: flex; flex-wrap: wrap; gap: 24px;
+    justify-content: center; margin: 30px auto;
+  }
   .card {
-    margin: 30px auto; padding: 20px; width: 260px;
+    margin: 0; padding: 20px; width: 260px;
     background: #0d1020; border: 2px solid #00bfff;
+    cursor: pointer; position: relative;
+  }
+  /* The chosen card glows, with a glow below it */
+  .card.selected {
+    box-shadow: 0 0 25px rgba(0, 191, 255, 0.8),
+                0 0 60px rgba(0, 191, 255, 0.4);
+  }
+  .card.selected::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 5%;
+    right: 5%;
+    height: 18px;
+    margin-top: 6px;
+    background: radial-gradient(ellipse at center,
+      rgba(0, 191, 255, 0.9), transparent 70%);
+    filter: blur(3px);
+    pointer-events: none;
   }
   .card h2 { margin: 0; color: #00bfff; }
   .card .value {
@@ -66,12 +89,19 @@
   <img class="sprite" src="assets/xado-sprite.png" alt="Xado_RemnantX">
   <p>Your name</p>
   <input id="nameInput" value="Xado_RemnantX">
-  <div class="card">
-    <h2>CELLO</h2>
-    <p>Starting sound — low, warm, bowed. The first card in your deck.</p>
-    <span class="value">5</span>
-    <br><br>
-    <button id="hearBtn">Hear it</button>
+  <div class="choices">
+    <div class="card selected" id="celloCard">
+      <h2>CELLO</h2>
+      <p>Starting sound — low, warm, bowed. The first card in your deck.</p>
+      <span class="value">5</span>
+      <br><br>
+      <button id="hearBtn">Hear it</button>
+    </div>
+    <div class="card" id="swordCard">
+      <h2>SWORD</h2>
+      <p>Starting weapon — huge blade with glowing blue circuitry.</p>
+      <span class="value">7</span>
+    </div>
   </div>
   <button id="beginBtn">Begin</button>
   <p id="message"></p>
@@ -108,10 +138,28 @@
       }
     }
     document.getElementById('hearBtn').addEventListener('click', playCello);
+
+    // Choose a starting card: cello or sword.
+    // The chosen card glows, and the choice carries into the game.
+    let startingCard = 'cello';
+    const celloCard = document.getElementById('celloCard');
+    const swordCard = document.getElementById('swordCard');
+    function selectCard(card) {
+      startingCard = card;
+      celloCard.classList.toggle('selected', card === 'cello');
+      swordCard.classList.toggle('selected', card === 'sword');
+      localStorage.setItem('tdol-starting-card', card);
+    }
+    celloCard.addEventListener('click', () => selectCard('cello'));
+    swordCard.addEventListener('click', () => selectCard('sword'));
+    const savedCard = localStorage.getItem('tdol-starting-card');
+    if (savedCard === 'sword') selectCard('sword');
+
     document.getElementById('beginBtn').addEventListener('click', () => {
       const name = document.getElementById('nameInput').value;
+      const item = startingCard === 'cello' ? 'cello in hand' : 'sword in hand';
       document.getElementById('message').textContent =
-        name + ' walks the dark, cello in hand.';
+        name + ' walks the dark, ' + item + '.';
       // Show the message, then fade out, show the loading
       // screen for ~5 seconds, then go to Level 1
       const loading = document.getElementById('loading');
