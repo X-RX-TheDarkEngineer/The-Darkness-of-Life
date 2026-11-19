@@ -26,6 +26,39 @@
     margin: 10px; padding: 12px 30px; font-size: 18px;
     background: #00bfff; color: #05070d; border: none; cursor: pointer;
   }
+  /* Fade the page out when Begin is pressed */
+  body > * { transition: opacity 1s ease; }
+  body.fading > *:not(#loading) { opacity: 0; }
+  /* Loading screen: X-RX, his run, and Loading... */
+  #loading {
+    position: fixed;
+    inset: 0;
+    background: #05070d;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+  }
+  #loading.show { opacity: 1; pointer-events: auto; }
+  #loading img {
+    height: 45vh;
+    max-width: 90vw;
+    object-fit: contain;
+  }
+  #loading video {
+    width: 320px;
+    max-width: 80vw;
+    margin-top: 8px;
+  }
+  #loading .loading-text {
+    color: #00bfff;
+    font-size: 22px;
+    letter-spacing: 4px;
+    margin-top: 16px;
+  }
 </style>
 </head>
 <body>
@@ -42,6 +75,13 @@
   </div>
   <button id="beginBtn">Begin</button>
   <p id="message"></p>
+
+  <!-- Loading screen shown when the game moves on -->
+  <div id="loading">
+    <img src="assets/x-rx-loading.png" alt="Xado_RemnantX">
+    <video src="assets/x-rx-running.mp4" autoplay muted loop playsinline></video>
+    <p class="loading-text">Loading...</p>
+  </div>
   <script>
     // A cello-like note: sawtooth through a low-pass filter,
     // slow attack like a bow, C2 (65.41 Hz) and its octave.
@@ -72,7 +112,12 @@
       const name = document.getElementById('nameInput').value;
       document.getElementById('message').textContent =
         name + ' walks the dark, cello in hand.';
-      setTimeout(() => { window.location.href = 'level1.html'; }, 1200);
+      // Show the message, then fade out, show the loading
+      // screen for ~5 seconds, then go to Level 1
+      const loading = document.getElementById('loading');
+      setTimeout(() => document.body.classList.add('fading'), 1500);
+      setTimeout(() => loading.classList.add('show'), 2500);
+      setTimeout(() => { window.location.href = 'level1.html'; }, 7500);
     });
   </script>
 </body>
