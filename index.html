@@ -32,14 +32,15 @@
       border: none;
       cursor: pointer;
     }
-    /* Full-screen moving title screen, content overlaid on top */
+    /* Full-screen title video, whole frame visible, nothing clipped */
     #titleVideo {
       position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
       height: 100vh;
-      object-fit: cover;
+      object-fit: contain;
+      background: #05070d;
       z-index: 0;
     }
     h1, p, button {
@@ -51,20 +52,19 @@
     /* The video has its own title and PRESS START baked in,
        so the page's own title text stays hidden */
     h1, .tagline { display: none; }
-    /* START is an invisible hot spot over the video's
-       baked-in PRESS START; tapping anywhere starts the game */
+    /* A real START button, below the video's own PRESS START */
     #startBtn {
       position: absolute;
       left: 50%;
-      top: 60%;
-      transform: translate(-50%, -50%);
-      width: 320px;
-      height: 70px;
-      background: transparent;
+      bottom: 7%;
+      transform: translateX(-50%);
+      padding: 14px 40px;
+      font-size: 20px;
+      background: #00bfff;
+      color: #05070d;
       border: none;
-      color: transparent;
+      cursor: pointer;
       margin-top: 0;
-      padding: 0;
     }
     /* Fade the title out when START is pressed */
     body > * { transition: opacity 1s ease; }
@@ -103,7 +103,7 @@
 </head>
 <body>
   <h1>THE DARKNESS OF LIFE</h1>
-  <video id="titleVideo" src="assets/title-screen.mp4" poster="assets/title-screen-poster.jpg" autoplay muted loop playsinline></video>
+  <video id="titleVideo" src="assets/title-screen.mp4" poster="assets/title-screen-poster.jpg" autoplay muted playsinline></video>
   <p class="tagline"><em>"We walk the dark, rise. We walk with truth and honor. We tend and earn our place."</em></p>
   <p class="tagline">A Chain of Memories-inspired card battler, made our own.</p>
   <button id="startBtn" aria-label="Start game">START</button>
@@ -117,6 +117,18 @@
   </div>
 
   <script>
+    // Play the title video once, then loop only its settled
+    // end portion — the diminished lurking above the town,
+    // X-RX standing with his coat blowing — until the user starts
+    const titleVideo = document.getElementById('titleVideo');
+    const TAIL_START = 7.5; // seconds in; the camera has stopped panning
+    titleVideo.addEventListener('timeupdate', () => {
+      if (titleVideo.duration &&
+          titleVideo.currentTime >= titleVideo.duration - 0.25) {
+        titleVideo.currentTime = TAIL_START;
+      }
+    });
+
     // When Start is pressed (or anywhere on the screen is tapped),
     // fade out the title, show the loading screen for ~5 seconds,
     // then go to character creation
