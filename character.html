@@ -9,6 +9,17 @@
   h1 { margin-top: 40px; color: #00bfff; }
   p { color: #9aa7bd; }
   img.sprite { width: 180px; image-rendering: pixelated; margin-top: 10px; }
+  .sprites {
+    display: flex; justify-content: center; align-items: flex-end;
+    gap: 30px; margin-top: 10px; flex-wrap: wrap;
+  }
+  .sprites img {
+    height: 220px; width: auto; image-rendering: pixelated;
+  }
+  .weapon-img {
+    display: block; width: 100%; max-width: 220px;
+    margin: 10px auto; image-rendering: pixelated;
+  }
   input {
     margin-top: 10px; padding: 10px; font-size: 20px; text-align: center;
     background: #0d1020; color: #e8ecf4; border: 1px solid #00bfff;
@@ -86,12 +97,16 @@
 </head>
 <body>
   <h1>WHO WALKS THE DARK?</h1>
-  <img class="sprite" src="assets/xado-sprite.png" alt="Xado_RemnantX">
+  <div class="sprites">
+    <img src="assets/xado-sprite.png" alt="Xado_RemnantX with his sword">
+    <img src="assets/x-rx-firing-cello-sprite.png" alt="Xado_RemnantX firing the electric cello">
+  </div>
   <p>Your name</p>
   <input id="nameInput" value="Xado_RemnantX">
   <div class="choices">
     <div class="card selected" id="celloCard">
       <h2>CELLO</h2>
+      <img class="weapon-img" src="assets/cello-weapon-sprite.png" alt="Electric cello weapon">
       <p>Starting sound — low, warm, bowed. The first card in your deck.</p>
       <span class="value">5</span>
       <br><br>
@@ -99,6 +114,7 @@
     </div>
     <div class="card" id="swordCard">
       <h2>SWORD</h2>
+      <img class="weapon-img" src="assets/sword-sprite.png" alt="Sword">
       <p>Starting weapon — huge blade with glowing blue circuitry.</p>
       <span class="value">7</span>
     </div>
