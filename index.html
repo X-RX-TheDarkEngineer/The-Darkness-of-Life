@@ -144,6 +144,7 @@
   <video id="titleVideo" src="assets/title-screen.mp4" poster="assets/title-screen-poster.jpg" autoplay muted playsinline></video>
   <video id="titleEndVideo" src="assets/title-screen-end.mp4" poster="assets/title-screen-end.png" muted playsinline preload="auto"></video>
   <div id="powerPulse"><div class="pulse-glow"></div></div>
+  <audio id="titleMusic" src="assets/title-music.mp3" loop preload="auto"></audio>
   <p class="tagline"><em>"We walk the dark, rise. We walk with truth and honor. We tend and earn our place."</em></p>
   <p class="tagline">A Chain of Memories-inspired card battler, made our own.</p>
   <button id="startBtn" aria-label="Start game">START</button>
@@ -156,25 +157,46 @@
   </div>
 
   <script>
-    // Play the title video once, then smoothly crossfade into the
-    // end scene — the diminished hovering over the city, X-RX
-    // holding his sword with his cello on his back, static with
-    // power. The end video plays once and holds its last frame;
-    // nothing loops.
+    // Title music: "Gason Van Yan's Coffin" — browsers only allow
+    // sound after a tap, so it starts on the first tap anywhere
+    const titleMusic = document.getElementById('titleMusic');
+    titleMusic.volume = 0.8;
+    document.addEventListener('pointerdown', () => {
+      titleMusic.play().catch(() => {});
+    }, { once: true });
+
+    // Title loop: the intro video plays, crossfades into the end
+    // scene — the diminished hovering over the city, X-RX holding
+    // his sword with his cello on his back, static with power —
+    // and when the end scene finishes, it fades back to the
+    // beginning video and the whole loop runs again.
     const titleVideo = document.getElementById('titleVideo');
     const endVideo = document.getElementById('titleEndVideo');
     const powerPulse = document.getElementById('powerPulse');
-    let transitioned = false;
+    let showing = 'title'; // 'title' or 'end'
+    function showEnd() {
+      if (started || showing === 'end') return;
+      showing = 'end';
+      endVideo.currentTime = 0;
+      endVideo.play();
+      endVideo.classList.add('show');
+      powerPulse.classList.add('show');
+      setTimeout(() => titleVideo.pause(), 1600);
+    }
+    function showTitle() {
+      if (started || showing === 'title') return;
+      showing = 'title';
+      titleVideo.currentTime = 0;
+      titleVideo.play();
+      endVideo.classList.remove('show');
+      powerPulse.classList.remove('show');
+      setTimeout(() => endVideo.pause(), 1600);
+    }
     titleVideo.addEventListener('timeupdate', () => {
-      if (transitioned || !titleVideo.duration) return;
-      if (titleVideo.currentTime >= titleVideo.duration - 1.5) {
-        transitioned = true;
-        endVideo.play();
-        endVideo.classList.add('show');
-        powerPulse.classList.add('show');
-        setTimeout(() => titleVideo.pause(), 1600);
-      }
+      if (!titleVideo.duration) return;
+      if (titleVideo.currentTime >= titleVideo.duration - 1.5) showEnd();
     });
+    endVideo.addEventListener('ended', showTitle);
 
     // When Start is pressed (or anywhere on the screen is tapped),
     // fade out the title, show the loading screen for ~5 seconds,
