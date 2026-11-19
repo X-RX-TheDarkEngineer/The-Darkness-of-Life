@@ -48,6 +48,24 @@
       text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9);
     }
     button { text-shadow: none; }
+    /* The video has its own title and PRESS START baked in,
+       so the page's own title text stays hidden */
+    h1, .tagline { display: none; }
+    /* START is an invisible hot spot over the video's
+       baked-in PRESS START; tapping anywhere starts the game */
+    #startBtn {
+      position: absolute;
+      left: 50%;
+      top: 60%;
+      transform: translate(-50%, -50%);
+      width: 320px;
+      height: 70px;
+      background: transparent;
+      border: none;
+      color: transparent;
+      margin-top: 0;
+      padding: 0;
+    }
     /* Fade the title out when START is pressed */
     body > * { transition: opacity 1s ease; }
     body.fading > *:not(#loading) { opacity: 0; }
@@ -85,10 +103,10 @@
 </head>
 <body>
   <h1>THE DARKNESS OF LIFE</h1>
-  <video id="titleVideo" src="assets/title-screen.mp4" poster="assets/title-screen-art.png" autoplay muted loop playsinline></video>
-  <p><em>"We walk the dark, rise. We walk with truth and honor. We tend and earn our place."</em></p>
-  <p>A Chain of Memories-inspired card battler, made our own.</p>
-  <button id="startBtn">START</button>
+  <video id="titleVideo" src="assets/title-screen.mp4" poster="assets/title-screen-poster.jpg" autoplay muted loop playsinline></video>
+  <p class="tagline"><em>"We walk the dark, rise. We walk with truth and honor. We tend and earn our place."</em></p>
+  <p class="tagline">A Chain of Memories-inspired card battler, made our own.</p>
+  <button id="startBtn" aria-label="Start game">START</button>
   <p id="message"></p>
 
   <!-- Loading screen shown after START: X-RX, his run, Loading... -->
@@ -99,14 +117,20 @@
   </div>
 
   <script>
-    // When Start is pressed, fade out the title, show the
-    // loading screen for ~5 seconds, then go to character creation
-    document.getElementById('startBtn').addEventListener('click', () => {
+    // When Start is pressed (or anywhere on the screen is tapped),
+    // fade out the title, show the loading screen for ~5 seconds,
+    // then go to character creation
+    let started = false;
+    function startGame() {
+      if (started) return;
+      started = true;
       document.body.classList.add('fading');
       const loading = document.getElementById('loading');
       setTimeout(() => loading.classList.add('show'), 1000);
       setTimeout(() => { window.location.href = 'character.html'; }, 6000);
-    });
+    }
+    document.getElementById('startBtn').addEventListener('click', startGame);
+    document.addEventListener('click', startGame);
   </script>
 </body>
 </html>
